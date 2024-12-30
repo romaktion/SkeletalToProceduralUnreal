@@ -53,12 +53,16 @@ public:
 };
 
 UCLASS()
-class SKELETALTOPROCEDURALRUNTIME_API UPakExportUtilityRuntime : public UBlueprintFunctionLibrary
+class SKELETALTOPROCEDURALRUNTIME_API USkeletalToProceduralRuntime : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool SkeletalToProcedural(USkeletalMeshComponent* SkeletalMeshComponent,
+	                                 UProceduralMeshComponent* ProcMeshComponent);
+
+	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
+	static bool SkeletalToProceduralWithParams(USkeletalMeshComponent* SkeletalMeshComponent,
 	                                 UProceduralMeshComponent* ProcMeshComponent, const FMyUVMapParameters& Params);
 
 private:

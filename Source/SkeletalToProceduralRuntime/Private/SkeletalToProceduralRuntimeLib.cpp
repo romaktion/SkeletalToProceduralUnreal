@@ -9,7 +9,22 @@
 #include "Engine/SkinnedAssetCommon.h"
 #include "Engine/StaticMesh.h"
 
-bool UPakExportUtilityRuntime::SkeletalToProcedural(USkeletalMeshComponent* SkeletalMeshComponent,
+bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* SkeletalMeshComponent,
+	UProceduralMeshComponent* ProcMeshComponent)
+{
+	if (!IsValid(ProcMeshComponent) || !IsValid(SkeletalMeshComponent)) return {};
+	
+	const auto RawMeshes{CollectRawMeshes({SkeletalMeshComponent}, {})};
+
+	if (!ensureMsgf(RawMeshes.Num() > 0, TEXT("Bad mesh %s"), *SkeletalMeshComponent->GetName()))
+		return {};
+
+	CreateProcMesh(RawMeshes, ProcMeshComponent, {}, {});
+	
+	return {};
+}
+
+bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshComponent* SkeletalMeshComponent,
                                                     UProceduralMeshComponent* ProcMeshComponent,
                                                     const FMyUVMapParameters& Params)
 {
@@ -20,12 +35,12 @@ bool UPakExportUtilityRuntime::SkeletalToProcedural(USkeletalMeshComponent* Skel
 	if (!ensureMsgf(RawMeshes.Num() > 0, TEXT("Bad mesh %s"), *SkeletalMeshComponent->GetName()))
 		return {};
 
-	CreateProcMesh(RawMeshes, ProcMeshComponent, false, Params);
+	CreateProcMesh(RawMeshes, ProcMeshComponent, true, Params);
 	
 	return {};
 }
 
-TArray<FRawMesh> UPakExportUtilityRuntime::CollectRawMeshes(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& Transform)
+TArray<FRawMesh> USkeletalToProceduralRuntime::CollectRawMeshes(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& Transform)
 {
 	TArray<FRawMesh> RawMeshes;
 	TArray<UMaterialInterface*> Materials;
@@ -74,17 +89,17 @@ TArray<FRawMesh> UPakExportUtilityRuntime::CollectRawMeshes(const TArray<UMeshCo
 	return RawMeshes;
 }
 
-bool UPakExportUtilityRuntime::IsValidSkinnedMeshComponent(const USkinnedMeshComponent* InComponent)
+bool USkeletalToProceduralRuntime::IsValidSkinnedMeshComponent(const USkinnedMeshComponent* InComponent)
 {
 	return InComponent && InComponent->MeshObject && InComponent->IsVisible();
 }
 
-bool UPakExportUtilityRuntime::IsValidStaticMeshComponent(const UStaticMeshComponent* InComponent)
+bool USkeletalToProceduralRuntime::IsValidStaticMeshComponent(const UStaticMeshComponent* InComponent)
 {
 	return InComponent && InComponent->GetStaticMesh() && InComponent->GetStaticMesh()->GetRenderData() && InComponent->IsVisible();
 }
 
-void UPakExportUtilityRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent* InSkinnedMeshComponent, const int32 InOverallMaxLODs,
+void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent* InSkinnedMeshComponent, const int32 InOverallMaxLODs,
                             const FMatrix& InComponentToWorld, TArray<FRawMesh>& OutRawMeshes, TArray<UMaterialInterface*>& OutMaterials)
 {
 	const int32 BaseMaterialIndex = OutMaterials.Num();
@@ -233,7 +248,7 @@ void UPakExportUtilityRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent* InS
 	}
 }
 
-void UPakExportUtilityRuntime::StaticMeshToRawMeshes(const UStaticMeshComponent* InStaticMeshComponent,
+void USkeletalToProceduralRuntime::StaticMeshToRawMeshes(const UStaticMeshComponent* InStaticMeshComponent,
                                                      int32 InOverallMaxLODs, const FMatrix& InComponentToWorld,
                                                      TArray<FRawMesh>& OutRawMeshes,
                                                      TArray<UMaterialInterface*>& OutMaterials)
@@ -307,7 +322,7 @@ void UPakExportUtilityRuntime::StaticMeshToRawMeshes(const UStaticMeshComponent*
 	}
 }
 
-TArray<FVector> UPakExportUtilityRuntime::Vectors3fToVectors(const TArray<FVector3f>& Source)
+TArray<FVector> USkeletalToProceduralRuntime::Vectors3fToVectors(const TArray<FVector3f>& Source)
 {
 	TArray<FVector> Res;
 	for (const auto& V : Source)
@@ -317,7 +332,7 @@ TArray<FVector> UPakExportUtilityRuntime::Vectors3fToVectors(const TArray<FVecto
 	return Res;
 }
 
-TArray<FVector2D> UPakExportUtilityRuntime::Vectors2fToVectors2D(const TArray<FVector2f>& Source)
+TArray<FVector2D> USkeletalToProceduralRuntime::Vectors2fToVectors2D(const TArray<FVector2f>& Source)
 {
 	if (Source.Num() == 0) return {};
 	
@@ -329,7 +344,7 @@ TArray<FVector2D> UPakExportUtilityRuntime::Vectors2fToVectors2D(const TArray<FV
 	return Res;
 }
 
-bool UPakExportUtilityRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMeshes,
+bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMeshes,
                                               UProceduralMeshComponent* ProcMeshComponent, const bool GenerateUV,
                                               const FMyUVMapParameters& Params)
 {
