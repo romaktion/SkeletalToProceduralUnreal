@@ -1,0 +1,55 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "SkeletalToProcedural",
+	"Description": "Converts skeletal mesh to procedural mesh in runtime",
+	"Category": "Procedural Systems",
+	"CreatedBy": "romaktion@gmail.com",
+	"CreatedByURL": "https://www.innocent.su",
+	"EngineVersion": "5.5.0",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "romaktion@gmail.com",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "SkeletalToProcedural",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Mac"
+			]
+		},
+		{
+			"Name": "SkeletalToProceduralRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Mac"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
+			"Name": "ProceduralMeshComponent",
+			"Enabled": true
+		},
+		{
+			"Name": "GeometryProcessing",
+			"Enabled": true
+		},
+		{
+			"Name": "FunctionalTestingEditor",
+			"Enabled": true
+		}
+	]
+}
