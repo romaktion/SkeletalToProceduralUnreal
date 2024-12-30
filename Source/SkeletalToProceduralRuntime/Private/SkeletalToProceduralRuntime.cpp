@@ -2,6 +2,7 @@
 
 #include "SkeletalToProceduralRuntime.h"
 #include "Modules/ModuleManager.h"
+#include "UObject/DevObjectVersion.h"
 
 DEFINE_LOG_CATEGORY(LogSkeletalToProceduralRuntime);
 
