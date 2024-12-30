@@ -6,7 +6,7 @@ Converting a skeletal mesh to a procedural mesh at runtime.
 
 ## Install
 
-1. Download SkeletalToProcedural Unreal Plugin release zip for you Unreal Engine version
+1. Download SkeletalToProcedural Unreal Plugin release zip for you Unreal Engine version https://github.com/romaktion/SkeletalToProceduralUnreal/releases/
 2. Extract to [Project directory]/Plugins folder
 
 ## How to use
