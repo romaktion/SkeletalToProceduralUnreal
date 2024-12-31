@@ -1,4 +1,4 @@
-# SkeletalToProcedural Unreal Plugin
+# Runtime Skeletal Mesh to Procedural Mesh Unreal Plugin
 
 <!-- Plugin description -->
 Converting a skeletal mesh to a procedural mesh at runtime.
