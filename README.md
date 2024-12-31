@@ -1,7 +1,7 @@
 # Runtime Skeletal Mesh (with/out morphs) to Procedural Mesh Unreal Engine Plugin
 
 <!-- Plugin description -->
-Creates a procedural mesh from skeletal mesh at runtime considering morphs if exist.
+Creates a procedural mesh from skeletal mesh at runtime  taking morphs into account.
 <!-- Plugin description end -->
 
 ## Install
