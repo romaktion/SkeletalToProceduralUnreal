@@ -36,19 +36,11 @@
 	],
 	"Plugins": [
 		{
-			"Name": "EditorScriptingUtilities",
-			"Enabled": true
-		},
-		{
 			"Name": "ProceduralMeshComponent",
 			"Enabled": true
 		},
 		{
 			"Name": "GeometryProcessing",
-			"Enabled": true
-		},
-		{
-			"Name": "FunctionalTestingEditor",
 			"Enabled": true
 		}
 	]
