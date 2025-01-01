@@ -7,7 +7,7 @@ Creates a procedural mesh from skeletal mesh at runtime  taking morphs into acco
 ## Install
 
 1. Download SkeletalToProcedural Unreal Plugin release zip for you Unreal Engine version https://github.com/romaktion/SkeletalToProceduralUnreal/releases/
-2. Extract to [Project directory]/Plugins folder
+2. Extract to [Engine directory]/Engine/Plugins/Marketplace folder
 
 ## How to use
 
