@@ -14,7 +14,7 @@ bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* 
 {
 	if (!IsValid(ProcMeshComponent) || !IsValid(SkeletalMeshComponent)) return {};
 	
-	const auto RawMeshes{CollectRawMeshes({SkeletalMeshComponent}, {})};
+	const auto RawMeshes{CollectRawMeshes({SkeletalMeshComponent}, SkeletalMeshComponent->GetComponentTransform())};
 
 	if (!ensureMsgf(RawMeshes.Num() > 0, TEXT("Bad mesh %s"), *SkeletalMeshComponent->GetName()))
 		return {};
@@ -30,7 +30,7 @@ bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshC
 {
 	if (!IsValid(ProcMeshComponent) || !IsValid(SkeletalMeshComponent)) return {};
 	
-	const auto RawMeshes{CollectRawMeshes({SkeletalMeshComponent}, {})};
+	const auto RawMeshes{CollectRawMeshes({SkeletalMeshComponent}, SkeletalMeshComponent->GetComponentTransform())};
 
 	if (!ensureMsgf(RawMeshes.Num() > 0, TEXT("Bad mesh %s"), *SkeletalMeshComponent->GetName()))
 		return {};
