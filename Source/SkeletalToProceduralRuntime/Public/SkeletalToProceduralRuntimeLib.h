@@ -73,6 +73,10 @@ public:
 	static bool SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
 									 AProceduralMeshActor* ProcMeshComponent, const FMyUVMapParameters& Params);
 
+	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
+	static bool StaticToProcedural(UStaticMeshComponent* StaticMeshComponent,
+									 UProceduralMeshComponent* ProcMeshComponent);
+	
 private:
 	static TArray<FRawMesh> CollectRawMeshes(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& Transform);
 	static bool IsValidSkinnedMeshComponent(const USkinnedMeshComponent* InComponent);

@@ -30,7 +30,7 @@ bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* 
 	for (int32 i = 0; i < Materials.Num(); ++i)
 		ProcMeshComponent->SetMaterial(i, Materials[i]);
 	
-	return {};
+	return true;
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProceduralActors(ASkeletalMeshActor* SkeletalMeshActor,
@@ -59,7 +59,7 @@ bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshC
 	for (int32 i = 0; i < Materials.Num(); ++i)
 		ProcMeshComponent->SetMaterial(i, Materials[i]);
 	
-	return {};
+	return true;
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
@@ -67,6 +67,28 @@ bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParamsActors(ASkeleta
 {
 	return SkeletalToProceduralWithParams(SkeletalMeshComponent->GetSkeletalMeshComponent(),
 	                               ProcMeshComponent->GetProceduralMeshComponent(), Params);
+}
+
+bool USkeletalToProceduralRuntime::StaticToProcedural(UStaticMeshComponent* StaticMeshComponent,
+	UProceduralMeshComponent* ProcMeshComponent)
+{
+	if (!IsValid(ProcMeshComponent) || !IsValid(StaticMeshComponent)) return {};
+	
+	TArray<UMaterialInterface*> Materials;
+	for (int32 i = 0; i < StaticMeshComponent->GetNumMaterials(); ++i)
+		Materials.Add(StaticMeshComponent->GetMaterial(i));
+	
+	const auto RawMeshes{CollectRawMeshes({StaticMeshComponent}, StaticMeshComponent->GetComponentTransform())};
+
+	if (!ensureMsgf(RawMeshes.Num() > 0, TEXT("Bad mesh %s"), *StaticMeshComponent->GetName()))
+		return {};
+
+	CreateProcMesh(RawMeshes, ProcMeshComponent, {}, {});
+
+	for (int32 i = 0; i < Materials.Num(); ++i)
+		ProcMeshComponent->SetMaterial(i, Materials[i]);
+	
+	return true;
 }
 
 TArray<FRawMesh> USkeletalToProceduralRuntime::CollectRawMeshes(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& Transform)
