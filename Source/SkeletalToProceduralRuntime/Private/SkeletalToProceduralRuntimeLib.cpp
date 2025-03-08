@@ -1,7 +1,9 @@
-// Copyright 2024 romaktion@gmail.com. All Rights Reserved.
+// Copyright Roman Kryvosheienko. All Rights Reserved.
 
 #include "SkeletalToProceduralRuntimeLib.h"
+#include "ProceduralMeshActor.h"
 #include "SkeletalRenderPublic.h"
+#include "Animation/SkeletalMeshActor.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "Runtime/Engine/Private/SkeletalRenderGPUSkin.h"
@@ -14,21 +16,38 @@ bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* 
 {
 	if (!IsValid(ProcMeshComponent) || !IsValid(SkeletalMeshComponent)) return {};
 	
+	TArray<UMaterialInterface*> Materials;
+	for (int32 i = 0; i < SkeletalMeshComponent->GetNumMaterials(); ++i)
+		Materials.Add(SkeletalMeshComponent->GetMaterial(i));
+	
 	const auto RawMeshes{CollectRawMeshes({SkeletalMeshComponent}, SkeletalMeshComponent->GetComponentTransform())};
 
 	if (!ensureMsgf(RawMeshes.Num() > 0, TEXT("Bad mesh %s"), *SkeletalMeshComponent->GetName()))
 		return {};
 
 	CreateProcMesh(RawMeshes, ProcMeshComponent, {}, {});
+
+	for (int32 i = 0; i < Materials.Num(); ++i)
+		ProcMeshComponent->SetMaterial(i, Materials[i]);
 	
 	return {};
 }
 
+bool USkeletalToProceduralRuntime::SkeletalToProceduralActors(ASkeletalMeshActor* SkeletalMeshActor,
+	AProceduralMeshActor* ProcMeshComponent)
+{
+	return SkeletalToProcedural(SkeletalMeshActor->GetSkeletalMeshComponent(), ProcMeshComponent->GetProceduralMeshComponent());
+}
+
 bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshComponent* SkeletalMeshComponent,
-                                                    UProceduralMeshComponent* ProcMeshComponent,
-                                                    const FMyUVMapParameters& Params)
+                                                                  UProceduralMeshComponent* ProcMeshComponent,
+                                                                  const FMyUVMapParameters& Params)
 {
 	if (!IsValid(ProcMeshComponent) || !IsValid(SkeletalMeshComponent)) return {};
+	
+	TArray<UMaterialInterface*> Materials;
+	for (int32 i = 0; i < SkeletalMeshComponent->GetNumMaterials(); ++i)
+		Materials.Add(SkeletalMeshComponent->GetMaterial(i));
 	
 	const auto RawMeshes{CollectRawMeshes({SkeletalMeshComponent}, SkeletalMeshComponent->GetComponentTransform())};
 
@@ -36,8 +55,18 @@ bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshC
 		return {};
 
 	CreateProcMesh(RawMeshes, ProcMeshComponent, true, Params);
+
+	for (int32 i = 0; i < Materials.Num(); ++i)
+		ProcMeshComponent->SetMaterial(i, Materials[i]);
 	
 	return {};
+}
+
+bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
+	AProceduralMeshActor* ProcMeshComponent, const FMyUVMapParameters& Params)
+{
+	return SkeletalToProceduralWithParams(SkeletalMeshComponent->GetSkeletalMeshComponent(),
+	                               ProcMeshComponent->GetProceduralMeshComponent(), Params);
 }
 
 TArray<FRawMesh> USkeletalToProceduralRuntime::CollectRawMeshes(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& Transform)
@@ -134,12 +163,7 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 		//const auto T3 = InSkinnedMeshComponent->GetSkeletalMeshRenderData()->LODRenderData[LODIndexRead].MorphTargetVertexInfoBuffers;
 //
 		//const auto T4 = InSkinnedMeshComponent->ActiveMorphTargets;
-
-		const auto IsCPU = InSkinnedMeshComponent->MeshObject->IsCPUSkinned();
 		
-		const auto Sk = static_cast<FSkeletalMeshObjectGPUSkin*>(InSkinnedMeshComponent->MeshObject);
-		
-
 		for (const auto & M : InSkinnedMeshComponent->GetSkinnedAsset()->GetMorphTargets())
 		{
 			const auto MO = M.Get();
@@ -147,8 +171,6 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 			const auto& T =  MO->GetMorphTargetDelta(LODIndexRead, Num);
 			const auto& T2 =  MO->GetMorphTargetDelta(LODIndexRead, Num);
 		}
-
-		const auto& T5 = InSkinnedMeshComponent->ActiveMorphTargets;
 		
 		FSkeletalMeshRenderData& SkeletalMeshRenderData = InSkinnedMeshComponent->MeshObject->GetSkeletalMeshRenderData();
 		FSkeletalMeshLODRenderData& LODData = SkeletalMeshRenderData.LODRenderData[LODIndexRead];

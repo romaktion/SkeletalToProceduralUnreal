@@ -1,4 +1,4 @@
-// Copyright 2024 romaktion@gmail.com. All Rights Reserved.
+// Copyright Roman Kryvosheienko. All Rights Reserved.
 
 using UnrealBuildTool;
 

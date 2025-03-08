@@ -1,4 +1,4 @@
-// Copyright 2024 romaktion@gmail.com. All Rights Reserved.
+// Copyright Roman Kryvosheienko. All Rights Reserved.
 
 #pragma once
 
@@ -7,6 +7,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "SkeletalToProceduralRuntimeLib.generated.h"
 
+class AProceduralMeshActor;
+class ASkeletalMeshActor;
 struct FRawMesh;
 class UProceduralMeshComponent;
 class USkeletalMeshComponent;
@@ -60,10 +62,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool SkeletalToProcedural(USkeletalMeshComponent* SkeletalMeshComponent,
 	                                 UProceduralMeshComponent* ProcMeshComponent);
+	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural, meta = (DisplayName = "SkeletalToProcedural"))
+	static bool SkeletalToProceduralActors(ASkeletalMeshActor* SkeletalMeshActor,
+									 AProceduralMeshActor* ProcMeshComponent);
 
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool SkeletalToProceduralWithParams(USkeletalMeshComponent* SkeletalMeshComponent,
 	                                 UProceduralMeshComponent* ProcMeshComponent, const FMyUVMapParameters& Params);
+	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural, meta = (DisplayName = "SkeletalToProceduralWithParams"))
+	static bool SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
+									 AProceduralMeshActor* ProcMeshComponent, const FMyUVMapParameters& Params);
 
 private:
 	static TArray<FRawMesh> CollectRawMeshes(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& Transform);
