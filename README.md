@@ -18,4 +18,4 @@ or you can use advanced node with params for UV regeneration if needed
 
 I made an example map with functions, which is located in the Сontent of the plugin
 
-P.S. StaticTopProcedural function is currently in experimental mode and does not work in the build.
+P.S. StaticToProcedural function is currently in experimental mode and does not work in the build.
