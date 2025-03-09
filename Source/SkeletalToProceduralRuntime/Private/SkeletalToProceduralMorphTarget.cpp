@@ -149,13 +149,8 @@ void USkeletalToProceduralMorphTarget::SyncDeltas()
 		for (const auto& Delta : Deltas)
 		{
 			FMorphTargetDelta D;
-#if ENGINE_MAJOR_VERSION >= 5
 			D.PositionDelta = FVector3f(Delta.PositionDelta);
 			D.TangentZDelta = FVector3f(Delta.TangentZDelta);
-#else
-			D.PositionDelta = Delta.PositionDelta;
-			D.TangentZDelta = Delta.TangentZDelta;
-#endif
 			D.SourceIdx = Delta.SourceIdx;
 			Vertices.Emplace(D);
 		}

@@ -12,6 +12,7 @@ class ASkeletalMeshActor;
 struct FRawMesh;
 class UProceduralMeshComponent;
 class USkeletalMeshComponent;
+class UBillboardComponent;
 
 UCLASS()
 class SKELETALTOPROCEDURALRUNTIME_API AProceduralActor : public AActor
