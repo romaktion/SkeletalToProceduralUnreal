@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/MorphTarget.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "SkeletalToProceduralMorphTarget.generated.h"
 
 USTRUCT()
