@@ -7,14 +7,14 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "SkeletalToProceduralRuntimeLib.generated.h"
 
-class AProceduralMeshActor;
+class AProceduralActor;
 class ASkeletalMeshActor;
 struct FRawMesh;
 class UProceduralMeshComponent;
 class USkeletalMeshComponent;
 
 UCLASS()
-class SKELETALTOPROCEDURALRUNTIME_API AProceduralMeshActor : public AActor
+class SKELETALTOPROCEDURALRUNTIME_API AProceduralActor : public AActor
 {
 	GENERATED_BODY()
 
@@ -27,7 +27,7 @@ private:
 	
 public:	
 	// Sets default values for this actor's properties
-	AProceduralMeshActor();
+	AProceduralActor();
 
 	UProceduralMeshComponent* GetProceduralMeshComponent() const { return ProceduralMeshComponent; }
 };
@@ -83,14 +83,14 @@ public:
 	                                 UProceduralMeshComponent* ProcMeshComponent);
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural, meta = (DisplayName = "SkeletalToProcedural"))
 	static bool SkeletalToProceduralActors(ASkeletalMeshActor* SkeletalMeshActor,
-									 AProceduralMeshActor* ProcMeshComponent);
+									 AProceduralActor* ProcMeshComponent);
 
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool SkeletalToProceduralWithParams(USkeletalMeshComponent* SkeletalMeshComponent,
 	                                 UProceduralMeshComponent* ProcMeshComponent, const FMyUVMapParameters& Params);
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural, meta = (DisplayName = "SkeletalToProceduralWithParams"))
 	static bool SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
-									 AProceduralMeshActor* ProcMeshComponent, const FMyUVMapParameters& Params);
+									 AProceduralActor* ProcMeshComponent, const FMyUVMapParameters& Params);
 
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool StaticToProcedural(UStaticMeshComponent* StaticMeshComponent,

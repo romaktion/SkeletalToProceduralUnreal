@@ -11,7 +11,7 @@
 #include "Engine/SkinnedAssetCommon.h"
 #include "Engine/StaticMesh.h"
 
-AProceduralMeshActor::AProceduralMeshActor()
+AProceduralActor::AProceduralActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -52,7 +52,7 @@ bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* 
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProceduralActors(ASkeletalMeshActor* SkeletalMeshActor,
-	AProceduralMeshActor* ProcMeshComponent)
+	AProceduralActor* ProcMeshComponent)
 {
 	return SkeletalToProcedural(SkeletalMeshActor->GetSkeletalMeshComponent(), ProcMeshComponent->GetProceduralMeshComponent());
 }
@@ -81,7 +81,7 @@ bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshC
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
-	AProceduralMeshActor* ProcMeshComponent, const FMyUVMapParameters& Params)
+	AProceduralActor* ProcMeshComponent, const FMyUVMapParameters& Params)
 {
 	return SkeletalToProceduralWithParams(SkeletalMeshComponent->GetSkeletalMeshComponent(),
 	                               ProcMeshComponent->GetProceduralMeshComponent(), Params);
