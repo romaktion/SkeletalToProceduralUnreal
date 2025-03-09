@@ -13,6 +13,25 @@ struct FRawMesh;
 class UProceduralMeshComponent;
 class USkeletalMeshComponent;
 
+UCLASS()
+class SKELETALTOPROCEDURALRUNTIME_API AProceduralMeshActor : public AActor
+{
+	GENERATED_BODY()
+
+private:
+	UPROPERTY(Category = StaticMeshActor, VisibleAnywhere, BlueprintReadOnly, meta = (ExposeFunctionCategories = "Mesh,Rendering,Physics,Components|StaticMesh", AllowPrivateAccess = "true"))
+	TObjectPtr<class UProceduralMeshComponent> ProceduralMeshComponent;
+
+	UPROPERTY(Category = StaticMeshActor, VisibleAnywhere, BlueprintReadOnly, meta = (ExposeFunctionCategories = "Mesh,Rendering,Physics,Components|StaticMesh", AllowPrivateAccess = "true"))
+	TObjectPtr<class UBillboardComponent> BillboardComponent;
+	
+public:	
+	// Sets default values for this actor's properties
+	AProceduralMeshActor();
+
+	UProceduralMeshComponent* GetProceduralMeshComponent() const { return ProceduralMeshComponent; }
+};
+
 USTRUCT(BlueprintType)
 struct FMyUVMapParameters
 {

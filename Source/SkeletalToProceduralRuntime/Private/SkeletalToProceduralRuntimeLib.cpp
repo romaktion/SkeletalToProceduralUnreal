@@ -1,15 +1,33 @@
 // Copyright Roman Kryvosheienko. All Rights Reserved.
 
 #include "SkeletalToProceduralRuntimeLib.h"
-#include "ProceduralMeshActor.h"
 #include "SkeletalRenderPublic.h"
 #include "Animation/SkeletalMeshActor.h"
+#include "Components/BillboardComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "Runtime/Engine/Private/SkeletalRenderGPUSkin.h"
 #include "Runtime/RawMesh/Public/RawMesh.h"
 #include "Engine/SkinnedAssetCommon.h"
 #include "Engine/StaticMesh.h"
+
+AProceduralMeshActor::AProceduralMeshActor()
+{
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	SetCanBeDamaged(false);
+
+	ProceduralMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMeshComponent"));
+	ProceduralMeshComponent->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+	ProceduralMeshComponent->Mobility = EComponentMobility::Static;
+	ProceduralMeshComponent->SetGenerateOverlapEvents(false);
+
+	RootComponent = ProceduralMeshComponent;
+
+	BillboardComponent = CreateDefaultSubobject<UBillboardComponent>(TEXT("BillboardComponent"));
+	BillboardComponent->SetupAttachment(RootComponent);
+}
 
 bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* SkeletalMeshComponent,
 	UProceduralMeshComponent* ProcMeshComponent)
