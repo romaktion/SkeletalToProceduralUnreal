@@ -32,7 +32,7 @@ void FSkeletalToProceduralModule::StartupModule()
 				const auto NewMorphTarget{NewObject<USkeletalToProceduralMorphTarget>(MorphTarget->GetOuter(), MorphName)};
 				NewMorphTarget->Init(MorphTarget);
 
-				//NewMorphTargets.Add(NewMorphTarget);
+				NewMorphTargets.Add(NewMorphTarget);
 			}
 
 			SkeletalMesh->SetMorphTargets(NewMorphTargets);
