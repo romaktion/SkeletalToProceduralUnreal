@@ -246,20 +246,15 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 						RawMesh.WedgeTexCoords[TexCoordIndex].Add(
 							DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.GetVertexUV(RealInd, TexCoordIndex));
 				}
-
-				//Calc normals and tangents from the static version instead of the skeletal one
-				FVector ZTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(RealInd);
-				FVector XTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentX(RealInd);
-				FVector YTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentY(RealInd);
-
+				
 				//add normals from the static mesh version instead because using the skeletal one doesn't work right.
-				RawMesh.WedgeTangentZ.Add(ZTangentStatic);
+				RawMesh.WedgeTangentZ.Add(DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(RealInd));
 
 				//add tangents
-				RawMesh.WedgeTangentX.Add(XTangentStatic);
+				RawMesh.WedgeTangentX.Add(DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentX(RealInd));
 
 				//add Y
-				RawMesh.WedgeTangentY.Add(YTangentStatic);
+				RawMesh.WedgeTangentY.Add(DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentY(RealInd));
 			}
 		}
 		
@@ -416,7 +411,7 @@ bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMes
 		for (int32 i = 0; i < RawMesh.VertexPositions.Num(); ++i)
 		{
 			Tangents.Emplace(static_cast<FVector>(RawMesh.WedgeTangentY[i]), false);
-			TangZ.Add(RawMesh.WedgeTangentZ[i]);
+			TangZ.Add(FVector(RawMesh.WedgeTangentZ[i]));
 		}
 		
 		TArray<FVector2D> UVs;
@@ -452,12 +447,12 @@ bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMes
 		}
 
 		TArray<FVector2D> EmptyArray;
-		ProcMeshComponent->CreateMeshSection(&RawMesh - &RawMeshes[0], RawMesh.VertexPositions
+		ProcMeshComponent->CreateMeshSection(&RawMesh - &RawMeshes[0], TArray<FVector>(RawMesh.VertexPositions)
 		                                     , Tris, TangZ
-		                                     , GenerateUV ? UVs : RawMesh.WedgeTexCoords[0],
-		                                     RawMesh.WedgeTexCoords[1]
-		                                     , RawMesh.WedgeTexCoords[2],
-		                                     RawMesh.WedgeTexCoords[3]
+		                                     , GenerateUV ? UVs : TArray<FVector2D>(RawMesh.WedgeTexCoords[0]),
+		                                      TArray<FVector2D>(RawMesh.WedgeTexCoords[1])
+		                                     , TArray<FVector2D>(RawMesh.WedgeTexCoords[2]),
+		                                     TArray<FVector2D>(RawMesh.WedgeTexCoords[3])
 		                                     , VertexColors, Tangents,
 		                                     true);
 	}

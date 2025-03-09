@@ -111,8 +111,9 @@ void USkeletalToProceduralMorphTarget::Init(UMorphTarget* MorphTarget)
 	BaseSkelMesh = MorphTarget->BaseSkelMesh;
 #if ENGINE_MAJOR_VERSION >= 5
 	for (const auto& LODModel : MorphTarget->GetMorphLODModels())
-#endif
+#else
 	for (const auto& LODModel : MorphTarget->MorphLODModels)
+#endif
 		MorphLODModels.Emplace(LODModel);
 }
 
@@ -124,7 +125,8 @@ void USkeletalToProceduralMorphTarget::BackupDeltas()
 	{
 		FSkeletalToProceduralMorphTargetLODModel SkeletalToProceduralMorphTargetLODModel;
 		for (const auto& Vertex : MorphLODModel.Vertices)
-			SkeletalToProceduralMorphTargetLODModel.Deltas.Emplace(Vertex.PositionDelta, Vertex.TangentZDelta, Vertex.SourceIdx);
+			SkeletalToProceduralMorphTargetLODModel.Deltas.Emplace(FVector(Vertex.PositionDelta),
+				FVector(Vertex.TangentZDelta), Vertex.SourceIdx);
 		SkeletalToProceduralMorphLODModels.Emplace(MoveTemp(SkeletalToProceduralMorphTargetLODModel));
 	}
 }
@@ -147,8 +149,8 @@ void USkeletalToProceduralMorphTarget::SyncDeltas()
 		for (const auto& Delta : Deltas)
 		{
 			FMorphTargetDelta D;
-			D.PositionDelta = Delta.PositionDelta;
-			D.TangentZDelta = Delta.TangentZDelta;
+			D.PositionDelta = FVector3f(Delta.PositionDelta);
+			D.TangentZDelta = FVector3f(Delta.TangentZDelta);
 			D.SourceIdx = Delta.SourceIdx;
 			Vertices.Emplace(D);
 		}
