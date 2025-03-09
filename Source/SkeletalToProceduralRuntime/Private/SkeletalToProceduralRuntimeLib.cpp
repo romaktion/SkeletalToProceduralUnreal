@@ -8,7 +8,10 @@
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "Runtime/Engine/Private/SkeletalRenderGPUSkin.h"
 #include "Runtime/RawMesh/Public/RawMesh.h"
+#if ENGINE_MAJOR_VERSION >= 5
 #include "Engine/SkinnedAssetCommon.h"
+#endif
+#include "Animation/MorphTarget.h"
 #include "Engine/StaticMesh.h"
 
 AProceduralActor::AProceduralActor()
@@ -203,10 +206,16 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 		//const auto T3 = InSkinnedMeshComponent->GetSkeletalMeshRenderData()->LODRenderData[LODIndexRead].MorphTargetVertexInfoBuffers;
 //
 		//const auto T4 = InSkinnedMeshComponent->ActiveMorphTargets;
-		
+
+#if ENGINE_MAJOR_VERSION >= 5
 		for (const auto & M : InSkinnedMeshComponent->GetSkinnedAsset()->GetMorphTargets())
+#else
+		for (const auto & MO : InSkinnedMeshComponent->SkeletalMesh->GetMorphTargets())
+#endif
 		{
+#if ENGINE_MAJOR_VERSION >= 5
 			const auto MO = M.Get();
+#endif
 			int32 Num;
 			const auto& T =  MO->GetMorphTargetDelta(LODIndexRead, Num);
 			const auto& T2 =  MO->GetMorphTargetDelta(LODIndexRead, Num);
@@ -239,9 +248,9 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 				}
 
 				//Calc normals and tangents from the static version instead of the skeletal one
-				FVector3f ZTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(RealInd);
-				FVector3f XTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentX(RealInd);
-				FVector3f YTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentY(RealInd);
+				FVector ZTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(RealInd);
+				FVector XTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentX(RealInd);
+				FVector YTangentStatic = DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentY(RealInd);
 
 				//add normals from the static mesh version instead because using the skeletal one doesn't work right.
 				RawMesh.WedgeTangentZ.Add(ZTangentStatic);
@@ -271,8 +280,8 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 
 		for (int32 SectionIndex = 0; SectionIndex < NumSections; SectionIndex++)
 		{
-			if (const FSkelMeshRenderSection& SkeletalMeshSection = LODData.RenderSections[SectionIndex];
-				InSkinnedMeshComponent->IsMaterialSectionShown(SkeletalMeshSection.MaterialIndex, LODIndexRead))
+			const FSkelMeshRenderSection& SkeletalMeshSection = LODData.RenderSections[SectionIndex];
+			if (InSkinnedMeshComponent->IsMaterialSectionShown(SkeletalMeshSection.MaterialIndex, LODIndexRead))
 			{
 				// Build 'wedge' info
 				const int32 NumWedges = SkeletalMeshSection.NumTriangles * 3;
@@ -384,28 +393,6 @@ void USkeletalToProceduralRuntime::StaticMeshToRawMeshes(const UStaticMeshCompon
 	}
 }
 
-TArray<FVector> USkeletalToProceduralRuntime::Vectors3fToVectors(const TArray<FVector3f>& Source)
-{
-	TArray<FVector> Res;
-	for (const auto& V : Source)
-	{
-		Res.Emplace(static_cast<FVector>(V));
-	}
-	return Res;
-}
-
-TArray<FVector2D> USkeletalToProceduralRuntime::Vectors2fToVectors2D(const TArray<FVector2f>& Source)
-{
-	if (Source.Num() == 0) return {};
-	
-	TArray<FVector2D> Res;
-	for (const auto& V : Source)
-	{
-		Res.Emplace(static_cast<FVector2D>(V));
-	}
-	return Res;
-}
-
 bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMeshes,
                                               UProceduralMeshComponent* ProcMeshComponent, const bool GenerateUV,
                                               const FMyUVMapParameters& Params)
@@ -415,7 +402,7 @@ bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMes
 	TArray<int32> Tris;
 	TArray<FProcMeshTangent> Tangents;
 	TArray<FColor> VertexColors;
-	TArray<FVector3f> TangZ;
+	TArray<FVector> TangZ;
 	
 	//Build procedural mesh
 	for (const auto& RawMesh : RawMeshes)
@@ -432,7 +419,7 @@ bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMes
 			TangZ.Add(RawMesh.WedgeTangentZ[i]);
 		}
 		
-		TArray<FVector2f> UVs;
+		TArray<FVector2D> UVs;
 		if (GenerateUV)
 		{
 			//Experimental generate UV
@@ -458,19 +445,19 @@ bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMes
 
 				float UCoord = FVector::DotProduct(Vertex, U) * Params.UVTile.X;
 				float VCoord = FVector::DotProduct(Vertex, V) * Params.UVTile.Y;
-				UVs.Add(FVector2f(UCoord, VCoord));
+				UVs.Add(FVector2D(UCoord, VCoord));
 			}
 			
 			//
 		}
 
 		TArray<FVector2D> EmptyArray;
-		ProcMeshComponent->CreateMeshSection(&RawMesh - &RawMeshes[0], Vectors3fToVectors(RawMesh.VertexPositions)
-		                                     , Tris, Vectors3fToVectors(TangZ)
-		                                     , Vectors2fToVectors2D(GenerateUV ? UVs : RawMesh.WedgeTexCoords[0]),
-		                                     Vectors2fToVectors2D(RawMesh.WedgeTexCoords[1])
-		                                     , Vectors2fToVectors2D(RawMesh.WedgeTexCoords[2]),
-		                                     Vectors2fToVectors2D(RawMesh.WedgeTexCoords[3])
+		ProcMeshComponent->CreateMeshSection(&RawMesh - &RawMeshes[0], RawMesh.VertexPositions
+		                                     , Tris, TangZ
+		                                     , GenerateUV ? UVs : RawMesh.WedgeTexCoords[0],
+		                                     RawMesh.WedgeTexCoords[1]
+		                                     , RawMesh.WedgeTexCoords[2],
+		                                     RawMesh.WedgeTexCoords[3]
 		                                     , VertexColors, Tangents,
 		                                     true);
 	}
