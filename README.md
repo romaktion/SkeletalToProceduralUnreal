@@ -11,9 +11,11 @@ Creates a procedural mesh from skeletal mesh at runtime  taking morphs into acco
 
 ## How to use
 
-You need to just call SkeletalToProcedural passing your SkeletalMeshComponent and ProceduralMeshComponent
-<img width="1364" alt="Screenshot 2024-12-31 at 02 29 32" src="https://github.com/user-attachments/assets/7c575fcb-c1b2-4f30-8433-4f8b35c80085" />
+You need to just call SkeletalToProcedural passing your SkeletalMeshComponent/SkeletalMeshActor and ProceduralMeshComponent/ProceduralActor
+<img width="1049" alt="Screenshot 2025-03-10 at 01 54 48" src="https://github.com/user-attachments/assets/679b9e9d-5158-49e8-bd95-905cee85eb3b" />
 or you can use advanced node with params for UV regeneration if needed
-<img width="1363" alt="Screenshot 2024-12-31 at 02 32 30" src="https://github.com/user-attachments/assets/67cca4a7-7eb8-4c82-9493-ac670ae27333" />
+<img width="1051" alt="Screenshot 2025-03-10 at 01 57 32" src="https://github.com/user-attachments/assets/76fa6ee3-c544-4335-a5ff-cf8d999aa926" />
 
-P.S. Advanced node has not been fully tested in real conditions, feedback is welcome!
+I made an example map with functions, which is located in the Сontent of the plugin
+
+P.S. StaticTopProcedural function is currently in experimental mode and does not work in the build.
