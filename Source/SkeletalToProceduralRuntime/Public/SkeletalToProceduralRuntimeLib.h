@@ -20,10 +20,10 @@ class SKELETALTOPROCEDURALRUNTIME_API AProceduralActor : public AActor
 
 private:
 	UPROPERTY(Category = StaticMeshActor, VisibleAnywhere, BlueprintReadOnly, meta = (ExposeFunctionCategories = "Mesh,Rendering,Physics,Components|StaticMesh", AllowPrivateAccess = "true"))
-	TObjectPtr<class UProceduralMeshComponent> ProceduralMeshComponent;
+	UProceduralMeshComponent* ProceduralMeshComponent;
 
 	UPROPERTY(Category = StaticMeshActor, VisibleAnywhere, BlueprintReadOnly, meta = (ExposeFunctionCategories = "Mesh,Rendering,Physics,Components|StaticMesh", AllowPrivateAccess = "true"))
-	TObjectPtr<class UBillboardComponent> BillboardComponent;
+	UBillboardComponent* BillboardComponent;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -106,6 +106,4 @@ private:
 	                                  const FMatrix& InComponentToWorld, TArray<FRawMesh>& OutRawMeshes, TArray<UMaterialInterface*>& OutMaterials);
 	static bool CreateProcMesh(const TArray<FRawMesh>& RawMeshes, UProceduralMeshComponent* ProcMeshComponent,
 	                           bool GenerateUV, const FMyUVMapParameters& Params);
-	static TArray<FVector> Vectors3fToVectors(const TArray<FVector3f>& Source);
-	static TArray<FVector2D> Vectors2fToVectors2D(const TArray<FVector2f>& Source);
 };
