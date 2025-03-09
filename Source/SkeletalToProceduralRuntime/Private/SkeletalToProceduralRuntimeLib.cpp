@@ -33,7 +33,7 @@ AProceduralActor::AProceduralActor()
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* SkeletalMeshComponent,
-	UProceduralMeshComponent* ProcMeshComponent)
+	UProceduralMeshComponent* ProcMeshComponent, bool WithMaterials/* = true*/)
 {
 	if (!IsValid(ProcMeshComponent) || !IsValid(SkeletalMeshComponent)) return {};
 	
@@ -48,21 +48,24 @@ bool USkeletalToProceduralRuntime::SkeletalToProcedural(USkeletalMeshComponent* 
 
 	CreateProcMesh(RawMeshes, ProcMeshComponent, {}, {});
 
-	for (int32 i = 0; i < Materials.Num(); ++i)
-		ProcMeshComponent->SetMaterial(i, Materials[i]);
+	if (WithMaterials)
+		for (int32 i = 0; i < Materials.Num(); ++i)
+			ProcMeshComponent->SetMaterial(i, Materials[i]);
 	
 	return true;
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProceduralActors(ASkeletalMeshActor* SkeletalMeshActor,
-	AProceduralActor* ProcMeshComponent)
+	AProceduralActor* ProcMeshComponent, bool WithMaterials/* = true*/)
 {
-	return SkeletalToProcedural(SkeletalMeshActor->GetSkeletalMeshComponent(), ProcMeshComponent->GetProceduralMeshComponent());
+	return SkeletalToProcedural(SkeletalMeshActor->GetSkeletalMeshComponent(),
+		ProcMeshComponent->GetProceduralMeshComponent(), WithMaterials);
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshComponent* SkeletalMeshComponent,
                                                                   UProceduralMeshComponent* ProcMeshComponent,
-                                                                  const FMyUVMapParameters& Params)
+                                                                  const FMyUVMapParameters& Params,
+                                                                  bool WithMaterials/* = true*/)
 {
 	if (!IsValid(ProcMeshComponent) || !IsValid(SkeletalMeshComponent)) return {};
 	
@@ -77,17 +80,18 @@ bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParams(USkeletalMeshC
 
 	CreateProcMesh(RawMeshes, ProcMeshComponent, true, Params);
 
-	for (int32 i = 0; i < Materials.Num(); ++i)
-		ProcMeshComponent->SetMaterial(i, Materials[i]);
+	if (WithMaterials)
+		for (int32 i = 0; i < Materials.Num(); ++i)
+			ProcMeshComponent->SetMaterial(i, Materials[i]);
 	
 	return true;
 }
 
 bool USkeletalToProceduralRuntime::SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
-	AProceduralActor* ProcMeshComponent, const FMyUVMapParameters& Params)
+	AProceduralActor* ProcMeshComponent, const FMyUVMapParameters& Params, bool WithMaterials/* = true*/)
 {
 	return SkeletalToProceduralWithParams(SkeletalMeshComponent->GetSkeletalMeshComponent(),
-	                               ProcMeshComponent->GetProceduralMeshComponent(), Params);
+	                               ProcMeshComponent->GetProceduralMeshComponent(), Params, WithMaterials);
 }
 
 bool USkeletalToProceduralRuntime::StaticToProcedural(UStaticMeshComponent* StaticMeshComponent,

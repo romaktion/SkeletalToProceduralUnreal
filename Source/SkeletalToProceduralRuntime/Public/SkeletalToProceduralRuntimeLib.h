@@ -81,17 +81,17 @@ class SKELETALTOPROCEDURALRUNTIME_API USkeletalToProceduralRuntime : public UBlu
 public:
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool SkeletalToProcedural(USkeletalMeshComponent* SkeletalMeshComponent,
-	                                 UProceduralMeshComponent* ProcMeshComponent);
+	                                 UProceduralMeshComponent* ProcMeshComponent, bool WithMaterials = true);
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural, meta = (DisplayName = "SkeletalToProcedural"))
 	static bool SkeletalToProceduralActors(ASkeletalMeshActor* SkeletalMeshActor,
-									 AProceduralActor* ProcMeshComponent);
+									 AProceduralActor* ProcMeshComponent, bool WithMaterials = true);
 
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool SkeletalToProceduralWithParams(USkeletalMeshComponent* SkeletalMeshComponent,
-	                                 UProceduralMeshComponent* ProcMeshComponent, const FMyUVMapParameters& Params);
+	                                 UProceduralMeshComponent* ProcMeshComponent, const FMyUVMapParameters& Params, bool WithMaterials = true);
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural, meta = (DisplayName = "SkeletalToProceduralWithParams"))
 	static bool SkeletalToProceduralWithParamsActors(ASkeletalMeshActor* SkeletalMeshComponent,
-									 AProceduralActor* ProcMeshComponent, const FMyUVMapParameters& Params);
+									 AProceduralActor* ProcMeshComponent, const FMyUVMapParameters& Params, bool WithMaterials = true);
 
 	UFUNCTION(BlueprintCallable, Category = SkeletalToProcedural)
 	static bool StaticToProcedural(UStaticMeshComponent* StaticMeshComponent,
