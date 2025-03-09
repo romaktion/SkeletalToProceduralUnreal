@@ -8,7 +8,7 @@
 void USkeletalToProceduralMorphTarget::Serialize(FArchive& Ar)
 {
 #if ENGINE_MAJOR_VERSION >= 5
-	UObject::Serialize( Ar );
+	Super::Serialize( Ar );
 #else
 	LLM_SCOPE(ELLMTag::Animation);
 	
