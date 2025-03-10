@@ -154,7 +154,7 @@ TArray<FRawMesh> USkeletalToProceduralRuntime::CollectRawMeshes(const TArray<UMe
 
 		if (IsValidSkinnedMeshComponent(SkinnedMeshComponent))
 		{
-			SkinnedMeshToRawMeshes(SkinnedMeshComponent, OverallMaxLODs, ComponentToWorld, RawMeshes, Materials);
+			RawMeshes = SkinnedMeshToRawMeshes(SkinnedMeshComponent, OverallMaxLODs, ComponentToWorld, Materials);
 		}
 		else if (IsValidStaticMeshComponent(StaticMeshComponent))
 		{
@@ -175,10 +175,10 @@ bool USkeletalToProceduralRuntime::IsValidStaticMeshComponent(const UStaticMeshC
 	return InComponent && InComponent->GetStaticMesh() && InComponent->GetStaticMesh()->GetRenderData() && InComponent->IsVisible();
 }
 
-void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent* InSkinnedMeshComponent, const int32 InOverallMaxLODs,
-                            const FMatrix& InComponentToWorld, TArray<FRawMesh>& OutRawMeshes, TArray<UMaterialInterface*>& OutMaterials)
+TArray<FRawMesh> USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent* InSkinnedMeshComponent, const int32 InOverallMaxLODs,
+                            const FMatrix& InComponentToWorld, TArray<UMaterialInterface*>& OutMaterials)
 {
-	const int32 BaseMaterialIndex = OutMaterials.Num();
+	TArray<FRawMesh> RawMeshes;
 
 	// Export all LODs to raw meshes
 	const int32 NumLODs = InSkinnedMeshComponent->GetNumLODs();
@@ -186,9 +186,7 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 	for (int32 OverallLODIndex = 0; OverallLODIndex < InOverallMaxLODs; OverallLODIndex++)
 	{
 		int32 LODIndexRead = FMath::Min(OverallLODIndex, NumLODs - 1);
-
-		FRawMesh& RawMesh = OutRawMeshes[OverallLODIndex];
-		const int32 BaseVertexIndex = RawMesh.VertexPositions.Num();
+		
 		OutMaterials.Add(InSkinnedMeshComponent->GetMaterial(0));
 
 #if ENGINE_MAJOR_VERSION < 5
@@ -205,42 +203,29 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 		//for (uint32 i = 0; i < PositionVertexBuffer.GetNumVertices(); ++i)
 		//	RawMesh.VertexPositions.Add(PositionVertexBuffer.VertexPosition(i));
 		
-		//const auto & T = InSkinnedMeshComponent->GetSkeletalMeshRenderData()->LODRenderData[LODIndexRead].MorphTargetVertexInfoBuffers.GetNumBatches();
-		//const auto & T2 = InSkinnedMeshComponent->GetSkeletalMeshRenderData()->LODRenderData[LODIndexRead].MorphTargetVertexInfoBuffers.GetNumMorphs();
-		//const auto T3 = InSkinnedMeshComponent->GetSkeletalMeshRenderData()->LODRenderData[LODIndexRead].MorphTargetVertexInfoBuffers;
-//
-		//const auto T4 = InSkinnedMeshComponent->ActiveMorphTargets;
-
-#if ENGINE_MAJOR_VERSION >= 5
-		for (const auto & M : InSkinnedMeshComponent->GetSkinnedAsset()->GetMorphTargets())
-#else
-		for (const auto & MO : InSkinnedMeshComponent->SkeletalMesh->GetMorphTargets())
-#endif
-		{
-#if ENGINE_MAJOR_VERSION >= 5
-			const auto MO = M.Get();
-#endif
-			int32 Num;
-			const auto& T =  MO->GetMorphTargetDelta(LODIndexRead, Num);
-			const auto& T2 =  MO->GetMorphTargetDelta(LODIndexRead, Num);
-		}
-		
-		FSkeletalMeshRenderData& SkeletalMeshRenderData = InSkinnedMeshComponent->MeshObject->GetSkeletalMeshRenderData();
-		FSkeletalMeshLODRenderData& LODData = SkeletalMeshRenderData.LODRenderData[LODIndexRead];
-
 		//Collect UVs, Normals, Tangents
-		const uint32 NumTexCoords = FMath::Min(LODData.StaticVertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords(),
-		                                       static_cast<uint32>(MAX_MESH_TEXTURE_COORDS));
 		FSkeletalMeshRenderData* SkMeshRenderData = InSkinnedMeshComponent->GetSkeletalMeshRenderData();
-		const FSkeletalMeshLODRenderData& DataArray = SkMeshRenderData->LODRenderData[LODIndexRead];
+		FSkeletalMeshLODRenderData& DataArray = SkMeshRenderData->LODRenderData[LODIndexRead];
+		const uint32 NumTexCoords = FMath::Min(DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords(),
+											   static_cast<uint32>(MAX_MESH_TEXTURE_COORDS));
+		FRawStaticIndexBuffer16or32Interface& IndexBuffer = *DataArray.MultiSizeIndexContainer.GetIndexBuffer();
 		for (const auto& RenderSection : DataArray.RenderSections)
 		{
-			//get num vertices
-			int32 NumSourceVertices = RenderSection.NumVertices;
-		
-			for (int32 i = 0; i < NumSourceVertices; i++)
+			FRawMesh RawMesh;
+
+			const auto SectionIndex{&RenderSection - &DataArray.RenderSections[0]};
+			
+			for (uint32 i = 0; i < RenderSection.NumVertices; i++)
 			{
 				const auto RealInd = i + RenderSection.BaseVertexIndex;
+
+#if ENGINE_MAJOR_VERSION >= 5
+				RawMesh.VertexPositions.Add(
+					static_cast<FVector4f>(InComponentToWorld.TransformPosition(
+						static_cast<FVector>(FinalVertices[RealInd].Position))));
+#else
+				RawMesh.VertexPositions.Add(InComponentToWorld.TransformPosition(FinalVertices[RealInd].Position));
+#endif
 
 				for (uint32 TexCoordIndex = 0; TexCoordIndex < MAX_MESH_TEXTURE_COORDS; TexCoordIndex++)
 				{
@@ -250,7 +235,6 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 						RawMesh.WedgeTexCoords[TexCoordIndex].Add(
 							DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.GetVertexUV(RealInd, TexCoordIndex));
 				}
-				
 				//add normals from the static mesh version instead because using the skeletal one doesn't work right.
 				RawMesh.WedgeTangentZ.Add(DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(RealInd));
 
@@ -260,43 +244,24 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 				//add Y
 				RawMesh.WedgeTangentY.Add(DataArray.StaticVertexBuffers.StaticMeshVertexBuffer.VertexTangentY(RealInd));
 			}
-		}
-		
-		// Copy skinned vertex positions
-		for (int32 VertIndex = 0; VertIndex < FinalVertices.Num(); ++VertIndex)
-		{
-#if ENGINE_MAJOR_VERSION >= 5
-			RawMesh.VertexPositions.Add(
-				static_cast<FVector4f>(InComponentToWorld.TransformPosition(
-					static_cast<FVector>(FinalVertices[VertIndex].Position))));
-#else
-			RawMesh.VertexPositions.Add(InComponentToWorld.TransformPosition(FinalVertices[VertIndex].Position));
-#endif
-		}
-
-		const int32 NumSections = LODData.RenderSections.Num();
-		FRawStaticIndexBuffer16or32Interface& IndexBuffer = *LODData.MultiSizeIndexContainer.GetIndexBuffer();
-
-		for (int32 SectionIndex = 0; SectionIndex < NumSections; SectionIndex++)
-		{
-			const FSkelMeshRenderSection& SkeletalMeshSection = LODData.RenderSections[SectionIndex];
-			if (InSkinnedMeshComponent->IsMaterialSectionShown(SkeletalMeshSection.MaterialIndex, LODIndexRead))
+			
+			if (InSkinnedMeshComponent->IsMaterialSectionShown(RenderSection.MaterialIndex, LODIndexRead))
 			{
 				// Build 'wedge' info
-				const int32 NumWedges = SkeletalMeshSection.NumTriangles * 3;
+				const int32 NumWedges = RenderSection.NumTriangles * 3;
 				for (int32 WedgeIndex = 0; WedgeIndex < NumWedges; WedgeIndex++)
 				{
-					const int32 VertexIndexForWedge = IndexBuffer.Get(SkeletalMeshSection.BaseIndex + WedgeIndex);
+					const int32 VertexIndexForWedge = IndexBuffer.Get(RenderSection.BaseIndex + WedgeIndex);
 
-					RawMesh.WedgeIndices.Add(BaseVertexIndex + VertexIndexForWedge);
+					RawMesh.WedgeIndices.Add(RenderSection.BaseVertexIndex + VertexIndexForWedge);
 
-					if (LODData.StaticVertexBuffers.ColorVertexBuffer.IsInitialized())
-						RawMesh.WedgeColors.Add(LODData.StaticVertexBuffers.ColorVertexBuffer.VertexColor(VertexIndexForWedge));
+					if (DataArray.StaticVertexBuffers.ColorVertexBuffer.IsInitialized())
+						RawMesh.WedgeColors.Add(DataArray.StaticVertexBuffers.ColorVertexBuffer.VertexColor(VertexIndexForWedge));
 					else
 						RawMesh.WedgeColors.Add(FColor::White);
 				}
 
-				int32 MaterialIndex = SkeletalMeshSection.MaterialIndex;
+				int32 MaterialIndex = RenderSection.MaterialIndex;
 				// use the remapping of material indices if there is a valid value
 				if (SrcLODInfo.LODMaterialMap.IsValidIndex(SectionIndex) && SrcLODInfo.LODMaterialMap[SectionIndex] != INDEX_NONE)
 				{
@@ -308,14 +273,19 @@ void USkeletalToProceduralRuntime::SkinnedMeshToRawMeshes(USkinnedMeshComponent*
 				}
 
 				// copy face info
-				for (uint32 TriIndex = 0; TriIndex < SkeletalMeshSection.NumTriangles; TriIndex++)
+				for (uint32 TriIndex = 0; TriIndex < RenderSection.NumTriangles; TriIndex++)
 				{
-					RawMesh.FaceMaterialIndices.Add(BaseMaterialIndex + MaterialIndex);
+					RawMesh.FaceMaterialIndices.Add(RenderSection.BaseVertexIndex + MaterialIndex);
 					RawMesh.FaceSmoothingMasks.Add(0); // Assume this is ignored as bRecomputeNormals is false
 				}
 			}
+			
+			RawMeshes.Emplace(RawMesh);
+			//if (RawMeshes.Num() == 2) break;
 		}
 	}
+
+	return RawMeshes;
 }
 
 void USkeletalToProceduralRuntime::StaticMeshToRawMeshes(const UStaticMeshComponent* InStaticMeshComponent,
@@ -398,14 +368,14 @@ bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMes
 {
 	ProcMeshComponent->ClearAllMeshSections();
 	
-	TArray<int32> Tris;
-	TArray<FProcMeshTangent> Tangents;
-	TArray<FColor> VertexColors;
-	TArray<FVector> TangZ;
-	
 	//Build procedural mesh
 	for (const auto& RawMesh : RawMeshes)
 	{
+		TArray<int32> Tris;
+		TArray<FProcMeshTangent> Tangents;
+		TArray<FColor> VertexColors;
+		TArray<FVector> TangZ;
+		
 		for (int32 i = 0; i < RawMesh.WedgeIndices.Num(); ++i)
 		{
 			Tris.Emplace(RawMesh.WedgeIndices[i]);
@@ -449,11 +419,10 @@ bool USkeletalToProceduralRuntime::CreateProcMesh(const TArray<FRawMesh>& RawMes
 			
 			//
 		}
-
-		TArray<FVector2D> EmptyArray;
+		
 		ProcMeshComponent->CreateMeshSection(&RawMesh - &RawMeshes[0], TArray<FVector>(RawMesh.VertexPositions)
 		                                     , Tris, TangZ
-		                                     , GenerateUV ? UVs : TArray<FVector2D>(RawMesh.WedgeTexCoords[0]),
+		                                     , GenerateUV ? UVs : TArray<FVector2D>(RawMesh.WedgeTexCoords[ProcMeshComponent->GetNumSections()]),
 		                                      TArray<FVector2D>(RawMesh.WedgeTexCoords[1])
 		                                     , TArray<FVector2D>(RawMesh.WedgeTexCoords[2]),
 		                                     TArray<FVector2D>(RawMesh.WedgeTexCoords[3])

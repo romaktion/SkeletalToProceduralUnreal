@@ -101,8 +101,8 @@ private:
 	static TArray<FRawMesh> CollectRawMeshes(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& Transform);
 	static bool IsValidSkinnedMeshComponent(const USkinnedMeshComponent* InComponent);
 	static bool IsValidStaticMeshComponent(const UStaticMeshComponent* InComponent);
-	static void SkinnedMeshToRawMeshes(USkinnedMeshComponent* InSkinnedMeshComponent, int32 InOverallMaxLODs,
-	                                   const FMatrix& InComponentToWorld, TArray<FRawMesh>& OutRawMeshes, TArray<UMaterialInterface*>& OutMaterials);
+	static TArray<FRawMesh> SkinnedMeshToRawMeshes(USkinnedMeshComponent* InSkinnedMeshComponent, int32 InOverallMaxLODs,
+	                                   const FMatrix& InComponentToWorld, TArray<UMaterialInterface*>& OutMaterials);
 	static void StaticMeshToRawMeshes(const UStaticMeshComponent* InStaticMeshComponent, int32 InOverallMaxLODs,
 	                                  const FMatrix& InComponentToWorld, TArray<FRawMesh>& OutRawMeshes, TArray<UMaterialInterface*>& OutMaterials);
 	static bool CreateProcMesh(const TArray<FRawMesh>& RawMeshes, UProceduralMeshComponent* ProcMeshComponent,
